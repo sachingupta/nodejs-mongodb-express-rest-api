@@ -1,9 +1,11 @@
 // server.js
 
 const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
-const { check, validationResult } = require('express-validator/check');
+const { check } = require('express-validator/check');
+const create = require('./create');
+const retrieve = require('./retrieve');
 
 const port = 8000;
 const app = express();
@@ -15,44 +17,16 @@ const validationRules = [
         .isIn(['sachin', 'Jedi', 'Sith', 'Rebel', 'Other'])
 ];
 
-const fetchCharValidationRules = [
-    check('id')
-        .exists()
-];
-
 app.use(bodyParser.json());
 
 MongoClient.connect(dbUrl, { useNewUrlParser: true })
     .then((client) => {
         const db = client.db(dbName);
-        app.post('/characters', validationRules, async (req, res) => {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-            const character = {
-                name: req.body.name,
-                association: req.body.association
-            };
-            const result = await db.collection('characters').insertOne(character);
-            res.status(201).send(character);
-        });
+        app.post('/characters', validationRules, create.createHandler.bind(this, db));
 
-        app.get('/characters', async (req, res) => {
-            const result = await db.collection('characters').find({}).toArray();
+        app.get('/characters', retrieve.collectionHandler.bind(this, db));
 
-            res.send(result);
-        });
-
-        app.get('/characters/:id', fetchCharValidationRules, async (req, res) => {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-
-            const results = await db.collection('characters').find({ _id: ObjectId(req.params.id) }).toArray();
-            res.send(results);
-        });
+        app.get('/characters/:id', retrieve.createValidationRules, retrieve.singleHandler.bind(this, db));
     })
     .catch((err) => {
         console.log('Error getting db connection');
