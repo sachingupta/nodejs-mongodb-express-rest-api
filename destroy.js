@@ -29,7 +29,6 @@ async function handler(db, req, res) {
       }
 }
 
-
 module.exports = {
     handler,
     validationRules
