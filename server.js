@@ -7,6 +7,7 @@ const { check } = require('express-validator/check');
 const create = require('./create');
 const retrieve = require('./retrieve');
 const update = require('./update');
+const destroy = require('./destroy');
 
 const port = 8000;
 const app = express();
@@ -25,6 +26,8 @@ MongoClient.connect(dbUrl, { useNewUrlParser: true })
         app.get('/characters/:id', retrieve.createValidationRules, retrieve.singleHandler.bind(this, db));
       
         app.put('/characters/:id', update.validationRules, update.handler.bind(this, db));
+    
+        app.delete('/characters/:id', destroy.validationRules, destroy.handler.bind(this, db));
     })
     .catch((err) => {
         console.log('Error getting db connection' + err);
