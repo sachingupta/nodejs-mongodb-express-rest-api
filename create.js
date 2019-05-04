@@ -1,4 +1,9 @@
-const { validationResult } = require('express-validator/check');
+const { check, validationResult } = require('express-validator/check');
+
+const validationRules = [
+    check('association')
+        .isIn(['sachin', 'Jedi', 'Sith', 'Rebel', 'Other'])
+];
 
 async function createHandler(db, req, res) {
     const errors = validationResult(req);
@@ -15,5 +20,6 @@ async function createHandler(db, req, res) {
 
 
 module.exports = {
-    createHandler
+    createHandler,
+    validationRules
 }
